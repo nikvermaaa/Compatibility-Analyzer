@@ -24,3 +24,13 @@ create table if not exists people (
   unique (linkedin_url, instagram_url)
 );
 
+-- 2. Raw Scrapes Cache
+create table if not exists raw_scrapes (
+  id uuid primary key default gen_random_uuid(),
+  person_id uuid references people(id) on delete cascade,
+  source text not null, -- 'linkedin' | 'instagram'
+  url text not null,
+  data jsonb not null,
+  created_at timestamptz default now()
+);
+
