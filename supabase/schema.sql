@@ -34,3 +34,14 @@ create table if not exists raw_scrapes (
   created_at timestamptz default now()
 );
 
+-- 3. Profiles (Dossier, Analysis, Agent Card, Reading Log)
+create table if not exists profiles (
+  person_id uuid primary key references people(id) on delete cascade,
+  dossier jsonb not null,
+  analysis jsonb not null,
+  agent_card jsonb not null,
+  reading_log jsonb,
+  model text,
+  created_at timestamptz default now()
+);
+
