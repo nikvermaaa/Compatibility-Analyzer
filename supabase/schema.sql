@@ -54,3 +54,21 @@ create table if not exists swipes (
   primary key (from_id, to_id)
 );
 
+-- 5. Dates
+create table if not exists dates (
+  id uuid primary key default gen_random_uuid(),
+  a_id uuid references people(id) on delete cascade,
+  b_id uuid references people(id) on delete cascade,
+  pool text not null default 'demo',
+  status text not null default 'scheduled', -- scheduled|live|done|failed
+  phase text default 'opener',
+  step int default 0,
+  date_card jsonb,
+  twist text,
+  a_debrief jsonb,
+  b_debrief jsonb,
+  outcome text, -- match|one_sided|pass
+  chemistry int,
+  created_at timestamptz default now()
+);
+
