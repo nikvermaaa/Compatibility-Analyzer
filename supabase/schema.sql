@@ -45,3 +45,12 @@ create table if not exists profiles (
   created_at timestamptz default now()
 );
 
+-- 4. Swipes (Pairwise candidate screening)
+create table if not exists swipes (
+  from_id uuid references people(id) on delete cascade,
+  to_id uuid references people(id) on delete cascade,
+  score int not null,
+  reason text,
+  primary key (from_id, to_id)
+);
+
