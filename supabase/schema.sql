@@ -87,3 +87,11 @@ create table if not exists date_messages (
   unique (date_id, seq)
 );
 
+-- 7. Rankings
+create table if not exists rankings (
+  person_id uuid primary key references people(id) on delete cascade,
+  ranked jsonb not null, -- [{rank, candidateId, fit, reason, dated, dateId, outcome}]
+  closing_note text,
+  updated_at timestamptz default now()
+);
+
