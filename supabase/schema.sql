@@ -72,3 +72,18 @@ create table if not exists dates (
   created_at timestamptz default now()
 );
 
+-- 6. Date Messages (Turn-by-turn dialogue & private thoughts)
+create table if not exists date_messages (
+  id bigserial primary key,
+  date_id uuid references dates(id) on delete cascade,
+  seq int not null,
+  speaker text not null, -- 'a' | 'b' | 'narrator'
+  phase text not null,
+  message text not null,
+  thought text,
+  vibe int,
+  proposal jsonb,
+  created_at timestamptz default now(),
+  unique (date_id, seq)
+);
+
