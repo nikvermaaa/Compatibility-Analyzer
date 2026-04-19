@@ -95,3 +95,19 @@ create table if not exists rankings (
   updated_at timestamptz default now()
 );
 
+-- 8. Storage bucket for profile photos
+insert into storage.buckets (id, name, public)
+values ('photos', 'photos', true)
+on conflict (id) do update set public = true;
+
+-- Storage policy for public viewing
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname = 'Public photos are viewable by everyone'
+  ) then
+    create policy "Public photos are viewable by everyone" on storage.objects
+      for select using (bucket_id = 'photos');
+  end if;
+end
+$$;
