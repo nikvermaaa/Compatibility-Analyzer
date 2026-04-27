@@ -66,3 +66,20 @@ export const AgentCardSchema = z.object({
 });
 export type AgentCard = z.infer<typeof AgentCardSchema>;
 
+export const ProposalSchema = z.object({
+  activity: z.string(),
+  place: z.string(),
+  timeOfDay: z.string(),
+  why: z.string(),
+}).nullable().optional();
+export type Proposal = z.infer<typeof ProposalSchema>;
+
+export const DateTurnSchema = z.object({
+  thought: z.string(),
+  message: z.string(),
+  vibe: z.number().min(1).max(10),
+  proposal: ProposalSchema,
+  accepts: z.boolean().nullable().optional(),
+});
+export type DateTurn = z.infer<typeof DateTurnSchema>;
+
