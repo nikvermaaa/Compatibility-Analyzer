@@ -37,3 +37,32 @@ export const DataQualitySchema = z.object({
 });
 export type DataQuality = z.infer<typeof DataQualitySchema>;
 
+export const AnalysisSchema = z.object({
+  oneLiner: z.string(),
+  summary: z.string(),
+  needs: z.array(InsightSchema),
+  hobbies: z.array(InsightSchema),
+  interests: z.array(InsightSchema),
+  values: z.array(InsightSchema),
+  personality: z.array(PersonalityTraitSchema),
+  lifestyle: LifestyleSchema,
+  communicationStyle: InsightSchema,
+  careerSnapshot: InsightSchema,
+  greenFlags: z.array(InsightSchema),
+  possibleFriction: z.array(InsightSchema),
+  idealDates: z.array(IdealDateSchema),
+  conversationHooks: z.array(z.string()),
+  dealbreakerGuesses: z.array(InsightSchema),
+  dataQuality: DataQualitySchema,
+});
+export type Analysis = z.infer<typeof AnalysisSchema>;
+
+export const AgentCardSchema = z.object({
+  voice: z.string(),
+  goals: z.array(z.string()),
+  mustHaves: z.array(z.string()),
+  boundaries: z.array(z.string()),
+  openerStyle: z.string(),
+});
+export type AgentCard = z.infer<typeof AgentCardSchema>;
+
