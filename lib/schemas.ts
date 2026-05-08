@@ -83,3 +83,43 @@ export const DateTurnSchema = z.object({
 });
 export type DateTurn = z.infer<typeof DateTurnSchema>;
 
+export const DebriefScoresSchema = z.object({
+  sharedInterests: z.number().min(0).max(10),
+  valuesAlignment: z.number().min(0).max(10),
+  conversationFlow: z.number().min(0).max(10),
+  lifestyleFit: z.number().min(0).max(10),
+  needsMet: z.number().min(0).max(10),
+});
+
+export const DebriefSchema = z.object({
+  scores: DebriefScoresSchema,
+  overall: z.number().min(0).max(100),
+  wouldSeeAgain: z.boolean(),
+  highlights: z.array(z.string()),
+  concerns: z.array(z.string()),
+  verdict: z.string(),
+});
+export type Debrief = z.infer<typeof DebriefSchema>;
+
+export const SwipeScoreSchema = z.object({
+  candidateId: z.string(),
+  score: z.number().min(0).max(100),
+  reason: z.string(),
+});
+export type SwipeScore = z.infer<typeof SwipeScoreSchema>;
+
+export const SwipeEvaluationResponseSchema = z.object({
+  evaluations: z.array(SwipeScoreSchema),
+});
+export type SwipeEvaluationResponse = z.infer<typeof SwipeEvaluationResponseSchema>;
+
+export interface PersonDossier {
+  name: string;
+  photoUrl?: string;
+  location?: string;
+  linkedin: {
+    headline?: string;
+    about?: string;
+    experience: {
+      id: string;
+      title: string;
