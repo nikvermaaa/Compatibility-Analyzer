@@ -123,3 +123,39 @@ export interface PersonDossier {
     experience: {
       id: string;
       title: string;
+      company: string;
+      duration?: string;
+      description?: string;
+    }[];
+    education: {
+      id: string;
+      school: string;
+      degree?: string;
+      field?: string;
+    }[];
+    skills: string[];
+    languages?: string[];
+    certifications?: string[];
+    volunteering?: string[];
+  };
+  instagram: {
+    username: string;
+    fullName?: string;
+    bio?: string;
+    followers?: number;
+    following?: number;
+    postsCount?: number;
+    isPrivate: boolean;
+    externalUrl?: string;
+    posts: {
+      id: string;
+      caption?: string;
+      hashtags: string[];
+      location?: string;
+      type: "image" | "video" | "carousel";
+      likes?: number;
+      date?: string;
+      imageUrl?: string;
+    }[];
+  };
+}
