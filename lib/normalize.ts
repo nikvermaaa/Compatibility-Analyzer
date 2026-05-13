@@ -73,3 +73,33 @@ export function normalizeDossier(
 
   // Skills
   const rawSkills = li.skills || [];
+  const skills: string[] = Array.isArray(rawSkills)
+    ? rawSkills.map((s: any) => (typeof s === "string" ? s : s.name || s.title)).filter(Boolean).slice(0, 15)
+    : [];
+
+  // 3. Process Instagram Posts
+  const rawPosts = ig.latestPosts || ig.posts || ig.media || [];
+  const posts: PersonDossier["instagram"]["posts"] = [];
+  if (Array.isArray(rawPosts)) {
+    rawPosts.slice(0, 12).forEach((p: any, idx: number) => {
+      const caption = trimText(p.caption || p.text || p.title, 400);
+      const hashtags = Array.isArray(p.hashtags)
+        ? p.hashtags
+        : (caption?.match(/#[a-zA-Z0-9_]+/g) || []).map((h: string) => h.replace("#", ""));
+
+      let type: "image" | "video" | "carousel" = "image";
+      if (p.isVideo || p.type === "Video" || p.productType === "clips") type = "video";
+      else if (p.type === "Sidecar" || Array.isArray(p.images)) type = "carousel";
+
+      posts.push({
+        id: `IG-post-${idx + 1}`,
+        caption,
+        hashtags: hashtags.slice(0, 8),
+        location: p.locationName || p.location?.name,
+        type,
+        likes: typeof p.likesCount === "number" ? p.likesCount : p.likes,
+        date: p.timestamp || p.date,
+        imageUrl: p.displayUrl || p.imageUrl || p.url,
+      });
+    });
+  }
