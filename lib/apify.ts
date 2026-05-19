@@ -53,3 +53,33 @@ export async function startApifyRun(actorId: string, input: object): Promise<str
   const json = await response.json();
   return json.data.id;
 }
+
+export async function getApifyRun(runId: string): Promise<{
+  id: string;
+  status: "READY" | "RUNNING" | "SUCCEEDED" | "FAILED" | "TIMED-OUT" | "ABORTED";
+  defaultDatasetId?: string;
+  exitCode?: number;
+}> {
+  const token = process.env.APIFY_TOKEN;
+  if (!token) throw new Error("APIFY_TOKEN is missing in environment variables.");
+
+  const response = await fetch(`${APIFY_BASE}/actor-runs/${runId}?token=${token}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Apify run status ${runId}: ${response.status}`);
+  }
+
+  const json = await response.json();
+  return json.data;
+}
+
+export async function getApifyDatasetItems(datasetId: string): Promise<any[]> {
+  const token = process.env.APIFY_TOKEN;
+  if (!token) throw new Error("APIFY_TOKEN is missing in environment variables.");
+
+  const response = await fetch(`${APIFY_BASE}/datasets/${datasetId}/items?clean=true&token=${token}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch Apify dataset items ${datasetId}: ${response.status}`);
+  }
+
+  return response.json();
+}
