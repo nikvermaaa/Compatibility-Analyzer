@@ -103,3 +103,31 @@ export function normalizeDossier(
       });
     });
   }
+
+  return {
+    name,
+    photoUrl,
+    location,
+    linkedin: {
+      headline: trimText(li.headline || li.occupation || li.title, 200),
+      about: trimText(li.summary || li.about || li.description, 800),
+      experience,
+      education,
+      skills,
+      languages: Array.isArray(li.languages) ? li.languages.slice(0, 6) : undefined,
+      certifications: Array.isArray(li.certifications) ? li.certifications.slice(0, 6) : undefined,
+      volunteering: Array.isArray(li.volunteering) ? li.volunteering.slice(0, 4) : undefined,
+    },
+    instagram: {
+      username: ig.username || "unknown",
+      fullName: ig.fullName,
+      bio: trimText(ig.biography || ig.bio, 400),
+      followers: ig.followersCount ?? ig.followers,
+      following: ig.followsCount ?? ig.following,
+      postsCount: ig.postsCount,
+      isPrivate: Boolean(ig.isPrivate || ig.private),
+      externalUrl: ig.externalUrl || ig.website,
+      posts,
+    },
+  };
+}
