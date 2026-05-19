@@ -28,3 +28,28 @@ export function validateInstagramUrl(url: string): { valid: boolean; username?: 
     return {
       valid: false,
       error: "Invalid Instagram URL. Must be in the format: https://www.instagram.com/username",
+    };
+  }
+  const username = match[2].replace(/\/$/, "");
+  return { valid: true, username };
+}
+
+export async function startApifyRun(actorId: string, input: object): Promise<string> {
+  const token = process.env.APIFY_TOKEN;
+  if (!token) throw new Error("APIFY_TOKEN is missing in environment variables.");
+
+  const formattedId = actorId.replace("/", "~");
+  const response = await fetch(`${APIFY_BASE}/acts/${formattedId}/runs?token=${token}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Apify failed to start actor ${actorId}: ${response.status} ${errorText}`);
+  }
+
+  const json = await response.json();
+  return json.data.id;
+}
