@@ -33,3 +33,23 @@ function getClient(provider: string): { type: "gemini" | "openai"; client: any; 
     return { type: "gemini", client: new GoogleGenerativeAI(key), model };
   }
 
+  if (provider === "groq_big") {
+    const key = process.env.GROQ_API_KEY;
+    if (!key) return null;
+    const model = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+    return {
+      type: "openai",
+      client: new OpenAI({ apiKey: key, baseURL: "https://api.groq.com/openai/v1" }),
+      model,
+    };
+  }
+
+  if (provider === "groq_small") {
+    const key = process.env.GROQ_API_KEY;
+    if (!key) return null;
+    const model = process.env.GROQ_SMALL_MODEL || "openai/gpt-oss-20b";
+    return {
+      type: "openai",
+      client: new OpenAI({ apiKey: key, baseURL: "https://api.groq.com/openai/v1" }),
+      model,
+    };
