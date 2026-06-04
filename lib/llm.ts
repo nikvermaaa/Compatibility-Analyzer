@@ -53,3 +53,23 @@ function getClient(provider: string): { type: "gemini" | "openai"; client: any; 
       client: new OpenAI({ apiKey: key, baseURL: "https://api.groq.com/openai/v1" }),
       model,
     };
+  }
+
+  if (provider === "cerebras") {
+    const key = process.env.CEREBRAS_API_KEY;
+    if (!key) return null;
+    const model = process.env.CEREBRAS_MODEL || "llama3.3-70b";
+    return {
+      type: "openai",
+      client: new OpenAI({ apiKey: key, baseURL: "https://api.cerebras.ai/v1" }),
+      model,
+    };
+  }
+
+  if (provider === "openrouter") {
+    const key = process.env.OPENROUTER_API_KEY;
+    if (!key) return null;
+    const model = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free";
+    return {
+      type: "openai",
+      client: new OpenAI({ apiKey: key, baseURL: "https://openrouter.ai/api/v1" }),
