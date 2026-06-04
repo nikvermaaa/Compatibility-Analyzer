@@ -73,3 +73,43 @@ function getClient(provider: string): { type: "gemini" | "openai"; client: any; 
     return {
       type: "openai",
       client: new OpenAI({ apiKey: key, baseURL: "https://openrouter.ai/api/v1" }),
+      model,
+    };
+  }
+
+  return null;
+}
+
+export async function complete({
+  tier,
+  system,
+  messages,
+  json = false,
+  retries = 3,
+}: {
+  tier: Tier;
+  system: string;
+  messages: { role: "user" | "assistant"; content: string }[];
+  json?: boolean;
+  retries?: number;
+}): Promise<string> {
+  const providerList = PROVIDERS[tier];
+
+  for (const provider of providerList) {
+    if (isCoolingDown(provider)) continue;
+    const resolved = getClient(provider);
+    if (!resolved) continue;
+
+    try {
+      console.log(`[LLM Router] Invoking provider: ${provider} (model: ${resolved.model}, tier: ${tier})`);
+      if (resolved.type === "gemini") {
+        const genAI = resolved.client as GoogleGenerativeAI;
+        const geminiModel = genAI.getGenerativeModel({
+          model: resolved.model,
+          systemInstruction: system,
+          generationConfig: json ? { responseMimeType: "application/json" } : undefined,
+        });
+
+        const promptText = messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
+        const res = await geminiModel.generateContent(promptText);
+        const text = res.response.text();
