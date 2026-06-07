@@ -143,3 +143,33 @@ export async function complete({
         await new Promise((resolve) => setTimeout(resolve, 1000));
         continue;
       }
+    }
+  }
+
+  if (retries > 0) {
+    console.warn(`[LLM Router] All providers cooling down or unavailable. Waiting 6s before retry...`);
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+    return complete({ tier, system, messages, json, retries: retries - 1 });
+  }
+
+  throw new Error("All configured LLM providers failed or exhausted rate limits.");
+}
+
+export function cleanJsonText(raw: string): string {
+  let cleaned = raw.trim();
+  if (cleaned.startsWith("```json")) {
+    cleaned = cleaned.slice(7);
+  } else if (cleaned.startsWith("```")) {
+    cleaned = cleaned.slice(3);
+  }
+  if (cleaned.endsWith("```")) {
+    cleaned = cleaned.slice(0, -3);
+  }
+  return cleaned.trim();
+}
+
+export async function completeJson<T>({
+  tier,
+  system,
+  messages,
+  schema,
