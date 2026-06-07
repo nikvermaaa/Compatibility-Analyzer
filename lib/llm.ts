@@ -173,3 +173,18 @@ export async function completeJson<T>({
   system,
   messages,
   schema,
+}: {
+  tier: Tier;
+  system: string;
+  messages: { role: "user" | "assistant"; content: string }[];
+  schema: ZodSchema<T>;
+}): Promise<T> {
+  const raw = await complete({ tier, system, messages, json: true });
+  const cleaned = cleanJsonText(raw);
+
+  try {
+    const parsed = JSON.parse(cleaned);
+    return schema.parse(parsed);
+  } catch (err: any) {
+    console.warn("[LLM Router] JSON validation error. Retrying once with error feedback...", err?.message);
+    const retryMessages = [
