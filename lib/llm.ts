@@ -113,3 +113,33 @@ export async function complete({
         const promptText = messages.map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
         const res = await geminiModel.generateContent(promptText);
         const text = res.response.text();
+        if (text) return text;
+      } else {
+        const openai = resolved.client as OpenAI;
+        const formattedMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+          { role: "system", content: system },
+          ...messages.map((m) => ({ role: m.role, content: m.content })),
+        ];
+
+        const res = await openai.chat.completions.create({
+          model: resolved.model,
+          messages: formattedMessages,
+          response_format: json ? { type: "json_object" } : undefined,
+          temperature: 0.7,
+        });
+
+        const content = res.choices[0]?.message?.content;
+        if (content) return content;
+      }
+    } catch (err: any) {
+      console.warn(`[LLM Router] Provider ${provider} failed:`, err?.message || err);
+      const status = err?.status || err?.statusCode || (err?.message?.includes("429") ? 429 : 500);
+
+      if (status === 429) {
+        setCooldown(provider, 25_000);
+        continue;
+      }
+      if (status >= 500) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        continue;
+      }
