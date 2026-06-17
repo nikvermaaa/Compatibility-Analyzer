@@ -188,3 +188,17 @@ export async function completeJson<T>({
   } catch (err: any) {
     console.warn("[LLM Router] JSON validation error. Retrying once with error feedback...", err?.message);
     const retryMessages = [
+      ...messages,
+      { role: "assistant" as const, content: cleaned },
+      {
+        role: "user" as const,
+        content: `Your previous response had schema validation errors:\n${err?.message}\nPlease output corrected, strictly valid JSON matching the exact schema requirements.`,
+      },
+    ];
+
+    const retryRaw = await complete({ tier, system, messages: retryMessages, json: true });
+    const retryCleaned = cleanJsonText(retryRaw);
+    const retryParsed = JSON.parse(retryCleaned);
+    return schema.parse(retryParsed);
+  }
+}
