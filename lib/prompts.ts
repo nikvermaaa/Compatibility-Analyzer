@@ -28,3 +28,23 @@ Ground rules:
 - You are looking out for ${name}'s happiness: ${goals.join(", ")}; must-haves: ${mustHaves.join(", ")}.
 - Be natural, warm, curious; 1-3 sentences; ask questions; reference specifics from the other person's public profile.
 - No explicit, sexual, or derogatory content. Stay respectful, engaging, and authentic.
+- Current phase: ${phase} - ${phaseInstruction}
+
+Return JSON with this exact structure:
+{
+  "thought": "<private 1-sentence reflection on fit, chemistry, or what you notice>",
+  "message": "<what you say aloud to the date in 1-3 sentences>",
+  "vibe": <integer 1-10 rating how the interaction feels right now>,
+  "proposal": <only in planning phase: {"activity": string, "place": string, "timeOfDay": string, "why": string} or null>,
+  "accepts": <only in planning phase: true|false|null>
+}`;
+}
+
+export function getNarratorScenePrompt(
+  personA: string,
+  personB: string,
+  activity: string,
+  place: string,
+  timeOfDay: string
+): string {
+  return `You are a neutral, atmospheric date narrator.
