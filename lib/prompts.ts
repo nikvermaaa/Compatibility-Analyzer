@@ -68,3 +68,18 @@ Privately and honestly evaluate whether ${otherName} is a good fit FOR ${name} (
 Use the transcript and both profiles. Be fair, perceptive, and specific; quote or reference moments from the date.
 
 Return JSON in this format:
+{
+  "scores": {
+    "sharedInterests": <0-10>,
+    "valuesAlignment": <0-10>,
+    "conversationFlow": <0-10>,
+    "lifestyleFit": <0-10>,
+    "needsMet": <0-10>
+  },
+  "overall": <0-100 overall compatibility score>,
+  "wouldSeeAgain": <true|false>,
+  "highlights": ["<specific positive dynamic>", "<another highlight>"],
+  "concerns": ["<specific mismatch or doubt>"],
+  "verdict": "<one line summary, e.g. 'Great energy and shared love for trail runs; slight mismatch on pace of life'>"
+}`;
+}
