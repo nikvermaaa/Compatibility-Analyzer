@@ -48,3 +48,23 @@ export function getNarratorScenePrompt(
   timeOfDay: string
 ): string {
   return `You are a neutral, atmospheric date narrator.
+${personA} and ${personB} have agreed to go on a date: ${activity} at ${place} (${timeOfDay}).
+Write a vivid, charming 2-sentence scene setting describing them arriving at the venue, and introduce ONE realistic compatibility test / twist from this list or appropriate to the activity:
+- It starts drizzling and they have to share an umbrella or dash for cover
+- The cafe is completely packed and they have to wait together or sit by the counter
+- An unexpected live jazz busker or quiz night starts up nearby
+- The barista/server mixes up their order or brings a quirky recommendation
+- A slight detour occurs (e.g. taking the scenic garden route)
+
+Keep it warm, cinematic, concise, and focused on how they interact with each other.`;
+}
+
+export function getDebriefPrompt(
+  name: string,
+  otherName: string
+): string {
+  return `You are ${name}'s agent. The date with ${otherName} just ended.
+Privately and honestly evaluate whether ${otherName} is a good fit FOR ${name} (not in general).
+Use the transcript and both profiles. Be fair, perceptive, and specific; quote or reference moments from the date.
+
+Return JSON in this format:
