@@ -83,3 +83,18 @@ Return JSON in this format:
   "verdict": "<one line summary, e.g. 'Great energy and shared love for trail runs; slight mismatch on pace of life'>"
 }`;
 }
+
+export const SWIPE_PROMPT = `You are the dating agent for the person described below.
+Your task is to evaluate each of the candidate cards and provide a baseline compatibility fit score (0-100) and a concise, 1-line reason for each candidate from YOUR person's perspective.
+
+Look for shared values, complementary lifestyle paces, common passions, and whether their stated needs align.
+Return JSON in the format:
+{
+  "evaluations": [
+    {
+      "candidateId": "<id>",
+      "score": <0-100>,
+      "reason": "<1-sentence reason highlighting fit or friction>"
+    }
+  ]
+}`;
