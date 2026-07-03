@@ -108,3 +108,32 @@ export async function analyzePerson(dossier: PersonDossier): Promise<{
           .join("\n")
       : null,
   ]
+    .filter(Boolean)
+    .join("\n");
+
+  const userContent = `Analyze this person based EXCLUSIVELY on their LinkedIn and Instagram data.
+Every single insight MUST cite evidence IDs (e.g. LI-about, LI-exp-1, IG-bio, IG-post-3).
+
+--- LINKEDIN DOSSIER ---
+${liDetails}
+
+--- INSTAGRAM DOSSIER ---
+${igDetails}
+
+Output a single JSON object containing "analysis" and "agentCard" properties.`;
+
+  const result = await completeJson({
+    tier: "smart",
+    system: ANALYZER_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: userContent }],
+    schema: CombinedAnalysisSchema,
+  });
+
+  const readingLog = generateReadingLog(dossier, result.analysis);
+
+  return {
+    analysis: result.analysis,
+    agentCard: result.agentCard,
+    readingLog,
+  };
+}
