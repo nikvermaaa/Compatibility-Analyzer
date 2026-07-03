@@ -73,3 +73,38 @@ export async function analyzePerson(dossier: PersonDossier): Promise<{
 }> {
   // Format dossier for LLM prompt
   const liDetails = [
+    `Name: ${dossier.name}`,
+    `Location: ${dossier.location || "Unknown"}`,
+    dossier.linkedin.headline ? `LI Headline: ${dossier.linkedin.headline}` : null,
+    dossier.linkedin.about ? `LI About [id: LI-about]: ${dossier.linkedin.about}` : null,
+    dossier.linkedin.experience.length > 0
+      ? `LI Experience:\n` +
+        dossier.linkedin.experience
+          .map((e) => `  - [id: ${e.id}] ${e.title} at ${e.company} (${e.duration || ""}): ${e.description || ""}`)
+          .join("\n")
+      : null,
+    dossier.linkedin.education.length > 0
+      ? `LI Education:\n` +
+        dossier.linkedin.education
+          .map((e) => `  - [id: ${e.id}] ${e.school} (${e.degree || ""} ${e.field || ""})`)
+          .join("\n")
+      : null,
+    dossier.linkedin.skills.length > 0 ? `LI Skills: ${dossier.linkedin.skills.join(", ")}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const igDetails = [
+    `IG Handle: @${dossier.instagram.username}`,
+    dossier.instagram.bio ? `IG Bio [id: IG-bio]: ${dossier.instagram.bio}` : null,
+    `IG Followers: ${dossier.instagram.followers || 0}, Posts: ${dossier.instagram.postsCount || 0}`,
+    dossier.instagram.posts.length > 0
+      ? `IG Recent Posts:\n` +
+        dossier.instagram.posts
+          .map(
+            (p) =>
+              `  - [id: ${p.id}] (${p.type}${p.location ? " at " + p.location : ""}): "${p.caption || ""}" [tags: ${p.hashtags.join(", ")}]`
+          )
+          .join("\n")
+      : null,
+  ]
