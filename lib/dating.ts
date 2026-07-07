@@ -48,3 +48,53 @@ export async function runSwipesForPerson(personId: string): Promise<number> {
   const pGender = normGender(personData.gender);
 
   // Filter candidates respecting open_to preferences if defined
+  const eligibleCandidates = candidates.filter((c) => {
+    const cOpenTo = normGender(c.open_to);
+    const cGender = normGender(c.gender);
+
+    if (pOpenTo === "women" && cGender === "men") return false;
+    if (pOpenTo === "men" && cGender === "women") return false;
+    if (cOpenTo === "women" && pGender === "men") return false;
+    if (cOpenTo === "men" && pGender === "women") return false;
+    return true;
+  });
+
+  if (eligibleCandidates.length === 0) return 0;
+
+  // Format compact candidate cards
+  const candidateCards = eligibleCandidates.map((c) => {
+    const a = (c.profiles as any)?.analysis || {};
+    return {
+      candidateId: c.id,
+      name: c.name,
+      oneLiner: a.oneLiner || "Professional looking for genuine connection",
+      hobbies: a.hobbies?.map((h: any) => h.text).slice(0, 3) || [],
+      interests: a.interests?.map((i: any) => i.text).slice(0, 3) || [],
+      values: a.values?.map((v: any) => v.text).slice(0, 2) || [],
+      idealDates: a.idealDates?.map((d: any) => d.idea).slice(0, 2) || [],
+    };
+  });
+
+  const prompt = `My person: ${personData.name}
+One-liner: ${personProfile?.oneLiner || ""}
+Core Values: ${personProfile?.values?.map((v: any) => v.text).join(", ") || ""}
+Lifestyle Pace: ${personProfile?.lifestyle?.pace || "balanced"}
+Agent Must-Haves: ${agentCard?.mustHaves?.join(", ") || "kindness, authenticity"}
+
+Evaluate these ${candidateCards.length} candidates:
+${JSON.stringify(candidateCards, null, 2)}`;
+
+  const evaluation = await completeJson({
+    tier: "smart",
+    system: SWIPE_PROMPT,
+    messages: [{ role: "user", content: prompt }],
+    schema: SwipeEvaluationResponseSchema,
+  });
+
+  // Save swipes
+  const swipeRows = evaluation.evaluations.map((ev) => ({
+    from_id: personId,
+    to_id: ev.candidateId,
+    score: Math.min(100, Math.max(0, ev.score)),
+    reason: ev.reason,
+  }));
