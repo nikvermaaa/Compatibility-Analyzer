@@ -148,3 +148,53 @@ export async function scheduleDatesForPerson(personId: string, minDates = 3, max
   (existingDates || []).forEach((d) => {
     alreadyDated.add(d.a_id === personId ? d.b_id : d.a_id);
   });
+
+  const createdDateIds: string[] = [];
+  const targetCount = Math.min(pairs.length, maxDates);
+
+  for (const p of pairs) {
+    if (alreadyDated.has(p.candidateId)) continue;
+    if (createdDateIds.length >= targetCount) break;
+
+    const { data: newDate, error: insertErr } = await supabase
+      .from("dates")
+      .insert({
+        a_id: personId,
+        b_id: p.candidateId,
+        status: "scheduled",
+        phase: "first_messages",
+        step: 0,
+        pool: "live",
+      })
+      .select("id")
+      .single();
+
+    if (!insertErr && newDate) {
+      createdDateIds.push(newDate.id);
+      alreadyDated.add(p.candidateId);
+    }
+  }
+
+  return createdDateIds;
+}
+
+export async function stepDate(dateId: string): Promise<{
+  done: boolean;
+  phase: string;
+  step: number;
+  message?: any;
+  outcome?: string;
+}> {
+  // 1. Fetch date info + people + profiles
+  const { data: date, error: dateErr } = await supabase
+    .from("dates")
+    .select(`
+      id, a_id, b_id, status, phase, step, date_card, twist,
+      a_debrief, b_debrief, outcome, chemistry,
+      person_a:people!dates_a_id_fkey(id, name, profiles(*)),
+      person_b:people!dates_b_id_fkey(id, name, profiles(*))
+    `)
+    .eq("id", dateId)
+    .single();
+
+  if (dateErr || !date) throw new Error(`Date ${dateId} not found`);
