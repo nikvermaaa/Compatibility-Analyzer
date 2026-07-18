@@ -198,3 +198,63 @@ export async function stepDate(dateId: string): Promise<{
     .single();
 
   if (dateErr || !date) throw new Error(`Date ${dateId} not found`);
+  if (date.status === "done") {
+    return { done: true, phase: "done", step: date.step, outcome: date.outcome };
+  }
+
+  const personA = (date as any).person_a;
+  const personB = (date as any).person_b;
+  const profileA = personA?.profiles?.analysis;
+  const cardA = personA?.profiles?.agent_card;
+  const profileB = personB?.profiles?.analysis;
+  const cardB = personB?.profiles?.agent_card;
+
+  // 2. Fetch existing messages
+  const { data: messages = [] } = await supabase
+    .from("date_messages")
+    .select("*")
+    .eq("date_id", dateId)
+    .order("seq", { ascending: true });
+
+  const currentSeq = (messages?.length || 0) + 1;
+
+  // Phase transition roadmap
+  // Seq 1..4: first_messages (A, B, A, B)
+  // Seq 5..8: planning (A, B, A, B)
+  // Seq 9: scene_setting (narrator)
+  // Seq 10..15: the_date (A, B, A, B, A, B)
+  // Seq 16..17: goodbye (A, B)
+  // Seq 18: debrief A
+  // Seq 19: debrief B
+  // Seq 20: wrap up & outcome
+
+  if (currentSeq <= 4) {
+    // Phase 1: First messages
+    const isA = currentSeq % 2 === 1;
+    const speaker = isA ? "a" : "b";
+    const speakerName = isA ? personA.name : personB.name;
+    const otherName = isA ? personB.name : personA.name;
+    const speakerCard = isA ? cardA : cardB;
+    const otherProfile = isA ? profileB : profileA;
+
+    const phaseInstruction =
+      currentSeq === 1
+        ? `Open warmly. Use one of these conversation hooks from ${otherName}'s profile: ${otherProfile?.conversationHooks?.slice(0, 3).join(" | ")}.`
+        : `Reply naturally, show curiosity about their lifestyle/hobbies, and ask an engaging follow-up.`;
+
+    const systemPrompt = getDateTurnPrompt(
+      speakerName,
+      speakerCard?.voice || "warm, witty, authentic",
+      speakerCard?.goals || ["connection"],
+      speakerCard?.mustHaves || ["kindness"],
+      "First Messages",
+      phaseInstruction
+    );
+
+    const transcriptText = (messages || [])
+      .slice(-6)
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const userPrompt = `Transcript so far:\n${transcriptText || "No messages yet. You have the opening turn."}\nGenerate your next turn as ${speakerName}.`;
+
