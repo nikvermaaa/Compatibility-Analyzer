@@ -98,3 +98,53 @@ ${JSON.stringify(candidateCards, null, 2)}`;
     score: Math.min(100, Math.max(0, ev.score)),
     reason: ev.reason,
   }));
+
+  const { error: upsertErr } = await supabase.from("swipes").upsert(swipeRows, {
+    onConflict: "from_id,to_id",
+  });
+  if (upsertErr) console.warn("Failed to upsert swipes:", upsertErr);
+
+  // Update person status
+  await supabase.from("people").update({ status: "swiped" }).eq("id", personId);
+
+  return swipeRows.length;
+}
+
+export async function scheduleDatesForPerson(personId: string, minDates = 3, maxDates = 4): Promise<string[]> {
+  // Find top mutual swipe pairs for this person
+  const { data: swipesFrom, error: sfErr } = await supabase
+    .from("swipes")
+    .select("to_id, score")
+    .eq("from_id", personId);
+
+  if (sfErr || !swipesFrom || swipesFrom.length === 0) return [];
+
+  const { data: swipesTo, error: stErr } = await supabase
+    .from("swipes")
+    .select("from_id, score")
+    .eq("to_id", personId);
+
+  const reverseScores = new Map<string, number>();
+  (swipesTo || []).forEach((s) => reverseScores.set(s.from_id, s.score));
+
+  // Calculate mutual scores
+  const pairs = swipesFrom
+    .map((s) => {
+      const rev = reverseScores.get(s.to_id) ?? s.score; // symmetric fallback
+      return {
+        candidateId: s.to_id,
+        score: (s.score + rev) / 2,
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  // Check existing dates for this person
+  const { data: existingDates } = await supabase
+    .from("dates")
+    .select("a_id, b_id")
+    .or(`a_id.eq.${personId},b_id.eq.${personId}`);
+
+  const alreadyDated = new Set<string>();
+  (existingDates || []).forEach((d) => {
+    alreadyDated.add(d.a_id === personId ? d.b_id : d.a_id);
+  });
