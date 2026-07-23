@@ -358,3 +358,53 @@ export async function stepDate(dateId: string): Promise<{
       })
       .eq("id", dateId);
 
+    return { done: false, phase: "planning", step: currentSeq, message: insertedMsg };
+  } else if (currentSeq === 9) {
+    // Phase 3: Narrator Scene Setting & Twist
+    const card: Proposal = date.date_card || {
+      activity: "Evening dessert and quiet drinks",
+      place: "Cozy bistro lounge",
+      timeOfDay: "Sunset",
+      why: "Intimate and relaxed",
+    };
+
+    const narratorPrompt = getNarratorScenePrompt(
+      personA.name,
+      personB.name,
+      card?.activity || "a cozy coffee date",
+      card?.place || "a quiet neighbourhood spot",
+      card?.timeOfDay || "evening"
+    );
+
+    const rawScene = await complete({
+      tier: "fast",
+      system: narratorPrompt,
+      messages: [{ role: "user", content: "Set the scene and introduce the atmospheric twist." }],
+    });
+
+    const cleanScene = rawScene.replace(/^["']|["']$/g, "").trim();
+
+    const { data: insertedMsg } = await supabase
+      .from("date_messages")
+      .insert({
+        date_id: dateId,
+        seq: currentSeq,
+        speaker: "narrator",
+        phase: "scene_setting",
+        message: cleanScene,
+        thought: "Observing their immediate chemistry as the moment unfolds.",
+        vibe: 8,
+      })
+      .select()
+      .single();
+
+    await supabase
+      .from("dates")
+      .update({
+        status: "live",
+        phase: "scene_setting",
+        step: currentSeq,
+        twist: cleanScene,
+      })
+      .eq("id", dateId);
+
