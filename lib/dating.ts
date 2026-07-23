@@ -258,3 +258,53 @@ export async function stepDate(dateId: string): Promise<{
 
     const userPrompt = `Transcript so far:\n${transcriptText || "No messages yet. You have the opening turn."}\nGenerate your next turn as ${speakerName}.`;
 
+    const turn = await completeJson({
+      tier: "fast",
+      system: systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+      schema: DateTurnSchema,
+    });
+
+    const { data: insertedMsg } = await supabase
+      .from("date_messages")
+      .insert({
+        date_id: dateId,
+        seq: currentSeq,
+        speaker,
+        phase: "first_messages",
+        message: turn.message,
+        thought: turn.thought,
+        vibe: turn.vibe,
+      })
+      .select()
+      .single();
+
+    await supabase.from("dates").update({ status: "live", phase: "first_messages", step: currentSeq }).eq("id", dateId);
+
+    return { done: false, phase: "first_messages", step: currentSeq, message: insertedMsg };
+  } else if (currentSeq <= 8) {
+    // Phase 2: Planning
+    const isA = currentSeq % 2 === 1;
+    const speaker = isA ? "a" : "b";
+    const speakerName = isA ? personA.name : personB.name;
+    const otherName = isA ? personB.name : personA.name;
+    const speakerCard = isA ? cardA : cardB;
+    const speakerProfile = isA ? profileA : profileB;
+    const otherProfile = isA ? profileB : profileA;
+
+    const phaseInstruction =
+      currentSeq === 5
+        ? `Suggest an outing activity that fits both of your interests (e.g. coffee, hiking, art gallery, indie jazz). Include a proposal object.`
+        : currentSeq === 6
+        ? `Respond to the proposed outing. If it fits, enthusiastically accept (accepts: true) and suggest a time or venue detail; otherwise counter-propose.`
+        : `Finalize the plan and confirm excitement for the upcoming date.`;
+
+    const systemPrompt = getDateTurnPrompt(
+      speakerName,
+      speakerCard?.voice || "warm, witty",
+      speakerCard?.goals || ["connection"],
+      speakerCard?.mustHaves || ["kindness"],
+      "Planning the Outing",
+      phaseInstruction
+    );
+
