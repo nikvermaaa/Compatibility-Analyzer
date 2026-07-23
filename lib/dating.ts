@@ -308,3 +308,53 @@ export async function stepDate(dateId: string): Promise<{
       phaseInstruction
     );
 
+    const transcriptText = (messages || [])
+      .slice(-6)
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const turn = await completeJson({
+      tier: "fast",
+      system: systemPrompt,
+      messages: [{ role: "user", content: `Transcript:\n${transcriptText}` }],
+      schema: DateTurnSchema,
+    });
+
+    let dateCard = date.date_card;
+    if (turn.proposal) {
+      dateCard = turn.proposal;
+    } else if (!dateCard && currentSeq >= 6) {
+      // Default fallback date card if LLM omitted proposal
+      dateCard = {
+        activity: "Specialty coffee and art stroll",
+        place: "Local Roastery & Sculpture Garden",
+        timeOfDay: "Saturday afternoon",
+        why: "Blends relaxed conversation with creative appreciation",
+      };
+    }
+
+    const { data: insertedMsg } = await supabase
+      .from("date_messages")
+      .insert({
+        date_id: dateId,
+        seq: currentSeq,
+        speaker,
+        phase: "planning",
+        message: turn.message,
+        thought: turn.thought,
+        vibe: turn.vibe,
+        proposal: turn.proposal || null,
+      })
+      .select()
+      .single();
+
+    await supabase
+      .from("dates")
+      .update({
+        status: "live",
+        phase: "planning",
+        step: currentSeq,
+        date_card: dateCard,
+      })
+      .eq("id", dateId);
+
