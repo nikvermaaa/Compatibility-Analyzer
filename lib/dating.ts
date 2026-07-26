@@ -448,3 +448,38 @@ export async function stepDate(dateId: string): Promise<{
         date_id: dateId,
         seq: currentSeq,
         speaker,
+        phase: "the_date",
+        message: turn.message,
+        thought: turn.thought,
+        vibe: turn.vibe,
+      })
+      .select()
+      .single();
+
+    await supabase.from("dates").update({ status: "live", phase: "the_date", step: currentSeq }).eq("id", dateId);
+
+    return { done: false, phase: "the_date", step: currentSeq, message: insertedMsg };
+  } else if (currentSeq <= 17) {
+    // Phase 5: Goodbye
+    const isA = currentSeq === 16;
+    const speaker = isA ? "a" : "b";
+    const speakerName = isA ? personA.name : personB.name;
+    const speakerCard = isA ? cardA : cardB;
+
+    const systemPrompt = getDateTurnPrompt(
+      speakerName,
+      speakerCard?.voice || "warm",
+      speakerCard?.goals || ["genuine bond"],
+      speakerCard?.mustHaves || [],
+      "Goodbye",
+      `The date has come to an end. Offer your parting words honestly, in character, indicating subtly how much you enjoyed the time.`
+    );
+
+    const transcriptText = (messages || [])
+      .slice(-6)
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const turn = await completeJson({
+      tier: "fast",
+      system: systemPrompt,
