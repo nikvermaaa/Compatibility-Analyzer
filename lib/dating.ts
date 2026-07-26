@@ -518,3 +518,33 @@ export async function stepDate(dateId: string): Promise<{
           role: "user",
           content: `Full date transcript:\n${transcriptText}\n\nProfiles:\n${personA.name}: ${profileA?.oneLiner}\n${personB.name}: ${profileB?.oneLiner}`,
         },
+      ],
+      schema: DebriefSchema,
+    });
+
+    await supabase
+      .from("dates")
+      .update({ a_debrief: debrief, phase: "debrief", step: currentSeq })
+      .eq("id", dateId);
+
+    return { done: false, phase: "debrief", step: currentSeq, message: debrief };
+  } else if (currentSeq === 19) {
+    // Phase 6: Debrief B
+    const transcriptText = (messages || [])
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const debrief = await completeJson({
+      tier: "smart",
+      system: getDebriefPrompt(personB.name, personA.name),
+      messages: [
+        {
+          role: "user",
+          content: `Full date transcript:\n${transcriptText}\n\nProfiles:\n${personB.name}: ${profileB?.oneLiner}\n${personA.name}: ${profileA?.oneLiner}`,
+        },
+      ],
+      schema: DebriefSchema,
+    });
+
+    await supabase
+      .from("dates")
