@@ -483,3 +483,38 @@ export async function stepDate(dateId: string): Promise<{
     const turn = await completeJson({
       tier: "fast",
       system: systemPrompt,
+      messages: [{ role: "user", content: `Context:\n${transcriptText}` }],
+      schema: DateTurnSchema,
+    });
+
+    const { data: insertedMsg } = await supabase
+      .from("date_messages")
+      .insert({
+        date_id: dateId,
+        seq: currentSeq,
+        speaker,
+        phase: "goodbye",
+        message: turn.message,
+        thought: turn.thought,
+        vibe: turn.vibe,
+      })
+      .select()
+      .single();
+
+    await supabase.from("dates").update({ status: "live", phase: "goodbye", step: currentSeq }).eq("id", dateId);
+
+    return { done: false, phase: "goodbye", step: currentSeq, message: insertedMsg };
+  } else if (currentSeq === 18) {
+    // Phase 6: Debrief A
+    const transcriptText = (messages || [])
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const debrief = await completeJson({
+      tier: "smart",
+      system: getDebriefPrompt(personA.name, personB.name),
+      messages: [
+        {
+          role: "user",
+          content: `Full date transcript:\n${transcriptText}\n\nProfiles:\n${personA.name}: ${profileA?.oneLiner}\n${personB.name}: ${profileB?.oneLiner}`,
+        },
