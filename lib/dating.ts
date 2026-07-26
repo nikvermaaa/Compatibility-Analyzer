@@ -408,3 +408,43 @@ export async function stepDate(dateId: string): Promise<{
       })
       .eq("id", dateId);
 
+    return { done: false, phase: "scene_setting", step: currentSeq, message: insertedMsg };
+  } else if (currentSeq <= 15) {
+    // Phase 4: The Date Itself
+    const isA = currentSeq % 2 === 0;
+    const speaker = isA ? "a" : "b";
+    const speakerName = isA ? personA.name : personB.name;
+    const speakerCard = isA ? cardA : cardB;
+
+    const phaseInstruction =
+      currentSeq <= 11
+        ? `React to the narrator's situation/twist with humor and grace. Share an authentic insight about your lifestyle or passions.`
+        : `Dive deeper into values, what drives you in life, and playful banter. Reference their perspectives respectfully.`;
+
+    const systemPrompt = getDateTurnPrompt(
+      speakerName,
+      speakerCard?.voice || "engaging, authentic",
+      speakerCard?.goals || ["connection"],
+      speakerCard?.mustHaves || ["kindness"],
+      "The Date",
+      phaseInstruction
+    );
+
+    const transcriptText = (messages || [])
+      .slice(-8)
+      .map((m) => `${m.speaker.toUpperCase()}: ${m.message}`)
+      .join("\n");
+
+    const turn = await completeJson({
+      tier: "fast",
+      system: systemPrompt,
+      messages: [{ role: "user", content: `Context:\n${transcriptText}` }],
+      schema: DateTurnSchema,
+    });
+
+    const { data: insertedMsg } = await supabase
+      .from("date_messages")
+      .insert({
+        date_id: dateId,
+        seq: currentSeq,
+        speaker,
