@@ -548,3 +548,23 @@ export async function stepDate(dateId: string): Promise<{
 
     await supabase
       .from("dates")
+      .update({ b_debrief: debrief, phase: "debrief", step: currentSeq })
+      .eq("id", dateId);
+
+    return { done: false, phase: "debrief", step: currentSeq, message: debrief };
+  } else {
+    // Step 20: Outcome & Wrap-up
+    const aDebrief = date.a_debrief;
+    const bDebrief = date.b_debrief;
+
+    const aYes = aDebrief?.wouldSeeAgain ?? true;
+    const bYes = bDebrief?.wouldSeeAgain ?? true;
+
+    let outcome: "match" | "one_sided" | "pass" = "pass";
+    if (aYes && bYes) outcome = "match";
+    else if (aYes || bYes) outcome = "one_sided";
+
+    // Average chemistry from vibe messages
+    const vibes = (messages || [])
+      .filter((m) => typeof m.vibe === "number")
+      .map((m) => m.vibe);
