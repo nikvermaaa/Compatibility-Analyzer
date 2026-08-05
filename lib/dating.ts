@@ -576,3 +576,7 @@ export async function stepDate(dateId: string): Promise<{
         status: "done",
         outcome,
         chemistry: avgVibe,
+        step: 20,
+      })
+      .eq("id", dateId);
+
