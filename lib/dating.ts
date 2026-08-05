@@ -568,3 +568,11 @@ export async function stepDate(dateId: string): Promise<{
     const vibes = (messages || [])
       .filter((m) => typeof m.vibe === "number")
       .map((m) => m.vibe);
+    const avgVibe = vibes.length > 0 ? Math.round((vibes.reduce((a, b) => a + b, 0) / vibes.length) * 10) : 75;
+
+    await supabase
+      .from("dates")
+      .update({
+        status: "done",
+        outcome,
+        chemistry: avgVibe,
