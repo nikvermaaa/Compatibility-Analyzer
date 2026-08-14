@@ -580,3 +580,9 @@ export async function stepDate(dateId: string): Promise<{
       })
       .eq("id", dateId);
 
+    // Recompute rankings for both people asynchronously
+    try {
+      await computeAndSaveRankings(personA.id);
+      await computeAndSaveRankings(personB.id);
+    } catch (rErr) {
+      console.warn("Error recomputing rankings post-date:", rErr);
