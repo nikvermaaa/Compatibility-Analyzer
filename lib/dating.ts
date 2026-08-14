@@ -586,3 +586,6 @@ export async function stepDate(dateId: string): Promise<{
       await computeAndSaveRankings(personB.id);
     } catch (rErr) {
       console.warn("Error recomputing rankings post-date:", rErr);
+    }
+
+    return { done: true, phase: "done", step: 20, outcome };
