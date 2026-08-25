@@ -83,3 +83,43 @@ export async function computeAndSaveRankings(personId: string): Promise<RankedCa
     let reason = swP.reason;
     let dated = false;
     let dateId: string | undefined;
+    let outcome: string | undefined;
+    let pVerdict: string | undefined;
+    let cVerdict: string | undefined;
+    let breakdown: any = undefined;
+
+    if (d) {
+      dated = true;
+      dateId = d.id;
+      outcome = d.outcome;
+
+      const isA = d.a_id === personId;
+      const debriefP = isA ? d.a_debrief : d.b_debrief;
+      const debriefC = isA ? d.b_debrief : d.a_debrief;
+
+      const pOverall = debriefP?.overall ?? 70;
+      const cOverall = debriefC?.overall ?? 70;
+
+      fit = 0.55 * pOverall + 0.25 * cOverall + 0.2 * swP.score;
+
+      if (debriefP?.wouldSeeAgain && debriefC?.wouldSeeAgain) {
+        fit += 5; // mutual match bonus
+      }
+
+      pVerdict = debriefP?.verdict;
+      cVerdict = debriefC?.verdict;
+      reason = debriefP?.verdict || `Shared high compatibility during the date.`;
+      breakdown = debriefP?.scores;
+    } else {
+      // Undated pair fallback
+      fit = 0.85 * (0.7 * swP.score + 0.3 * swC.score);
+      reason = swP.reason || "Profile screening indicates mutual potential.";
+    }
+
+    const clampedFit = Math.min(100, Math.max(0, Math.round(fit)));
+
+    evaluated.push({
+      candidateId: c.id,
+      name: c.name,
+      photoUrl: c.photo_url || (c.profiles as any)?.dossier?.photoUrl,
+      oneLiner: analysis.oneLiner,
