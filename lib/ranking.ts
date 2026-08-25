@@ -123,3 +123,45 @@ export async function computeAndSaveRankings(personId: string): Promise<RankedCa
       name: c.name,
       photoUrl: c.photo_url || (c.profiles as any)?.dossier?.photoUrl,
       oneLiner: analysis.oneLiner,
+      fit: clampedFit,
+      reason,
+      dated,
+      dateId,
+      outcome,
+      pVerdict,
+      cVerdict,
+      breakdown,
+    });
+  }
+
+  // Sort by fit descending
+  evaluated.sort((a, b) => b.fit - a.fit);
+
+  // Assign ranks
+  const ranked: RankedCandidate[] = evaluated.map((item, idx) => ({
+    ...item,
+    rank: idx + 1,
+  }));
+
+  // Generate closing note
+  let closingNote = "";
+  if (ranked.length > 0) {
+    const topPick = ranked[0];
+    closingNote = `Based on deep persona analysis and real date simulations, ${topPick.name} emerges as the strongest match with ${topPick.fit}% mutual compatibility. ${topPick.reason}`;
+  }
+
+  // Save to database
+  await supabase.from("rankings").upsert(
+    {
+      person_id: personId,
+      ranked,
+      closing_note: closingNote,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "person_id" }
+  );
+
+  await supabase.from("people").update({ status: "ranked" }).eq("id", personId);
+
+  return ranked;
+}
