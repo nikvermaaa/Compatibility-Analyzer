@@ -88,3 +88,92 @@ export default async function HomePage() {
           <div className="bg-surface/80 border border-surfaceBorder p-6 rounded-2xl flex flex-col justify-between hover:border-gold/40 transition-colors">
             <div>
               <div className="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-4">
+                <Compass className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-gold">Step 1</span>
+              <h3 className="text-lg font-semibold text-foreground mt-1 mb-2">Two Official Sources</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                Provide a LinkedIn profile and a public Instagram. Exactly two sources. No web search, no guesswork.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-surfaceBorder/60 text-[11px] font-mono text-muted/80">
+              Cached & normalized
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="bg-surface/80 border border-surfaceBorder p-6 rounded-2xl flex flex-col justify-between hover:border-gold/40 transition-colors">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-4">
+                <Brain className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-gold">Step 2</span>
+              <h3 className="text-lg font-semibold text-foreground mt-1 mb-2">The Agent Reads</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                The agent parses posts, captions, and roles into an evidence-backed persona: needs, lifestyle, values, and an Agent Card.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-surfaceBorder/60 text-[11px] font-mono text-muted/80">
+              Watch the agent read log
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="bg-surface/80 border border-surfaceBorder p-6 rounded-2xl flex flex-col justify-between hover:border-gold/40 transition-colors">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-4">
+                <MessagesSquare className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-gold">Step 3</span>
+              <h3 className="text-lg font-semibold text-foreground mt-1 mb-2">Multi-Turn Dates</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                Agents screen candidates, plan custom outings, react to narrator twists, chat in-character, and conduct private post-date debriefs.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-surfaceBorder/60 text-[11px] font-mono text-muted/80">
+              Private thoughts toggle
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="bg-surface/80 border border-surfaceBorder p-6 rounded-2xl flex flex-col justify-between hover:border-gold/40 transition-colors">
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-gold/10 text-gold flex items-center justify-center mb-4">
+                <Award className="w-5 h-5" />
+              </div>
+              <span className="text-[11px] font-mono uppercase tracking-wider text-gold">Step 4</span>
+              <h3 className="text-lg font-semibold text-foreground mt-1 mb-2">Mutual Ranking</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                Algorithmic scoring balances subjective chemistry, mutuality, and pre-date screening into an ordered ranking for every person.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-surfaceBorder/60 text-[11px] font-mono text-muted/80">
+              Blended compatibility formula
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Link Banner */}
+      <section className="w-full max-w-5xl mx-auto px-4 pb-20">
+        <div className="bg-gradient-to-r from-surface via-surfaceHover to-surface border border-gold/30 rounded-3xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
+            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-foreground">
+              Ready to meet the season?
+            </h3>
+            <p className="text-muted text-sm mt-1 max-w-md">
+              View the pre-simulated 25-person demo season without typing or waiting.
+            </p>
+          </div>
+          <Link
+            href="/demo"
+            className="flex items-center gap-2 bg-gold hover:bg-gold-light text-background font-semibold px-6 py-3 rounded-xl shadow-md transition-all whitespace-nowrap"
+          >
+            <span>Open Demo Season</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </section>
+    </div>
+  );
+}
