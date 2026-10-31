@@ -148,3 +148,113 @@ export default function DateRoomPage() {
             <h2 className="font-serif font-bold text-foreground text-base group-hover:text-gold transition-colors">
               {personA.name}
             </h2>
+            <span className="text-[11px] text-muted block max-w-[150px] truncate">
+              {personA.profiles?.analysis?.oneLiner || "Digital Twin"}
+            </span>
+          </div>
+        </Link>
+
+        {/* Center: Chemistry Meter */}
+        <div className="flex-1 flex justify-center">
+          <ChemistryMeter score={chemistryScore} />
+        </div>
+
+        {/* Person B */}
+        <Link
+          href={`/p/${personB.slug}`}
+          className="flex items-center gap-3 group text-center md:text-right flex-row-reverse md:flex-row"
+        >
+          <div className="text-right">
+            <h2 className="font-serif font-bold text-foreground text-base group-hover:text-gold transition-colors">
+              {personB.name}
+            </h2>
+            <span className="text-[11px] text-muted block max-w-[150px] truncate">
+              {personB.profiles?.analysis?.oneLiner || "Digital Twin"}
+            </span>
+          </div>
+          <img
+            src={personB.photo_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"}
+            alt={personB.name}
+            className="w-14 h-14 rounded-2xl object-cover border-2 border-surfaceBorder group-hover:border-gold transition-colors shadow-md"
+          />
+        </Link>
+      </div>
+
+      {/* 2. Controls & Mode Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 bg-surface/50 border border-surfaceBorder p-4 rounded-2xl">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowThoughts(!showThoughts)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-colors ${
+              showThoughts
+                ? "bg-gold/10 border-gold/40 text-gold"
+                : "bg-background border-surfaceBorder text-muted hover:text-foreground"
+            }`}
+          >
+            {showThoughts ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            <span>Show Agent Private Thoughts</span>
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {date.status !== "done" ? (
+            <>
+              <button
+                onClick={handleStep}
+                disabled={stepping}
+                className="bg-gold hover:bg-gold-light text-background font-semibold px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
+              >
+                {stepping ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                <span>Step Next Turn</span>
+              </button>
+
+              <button
+                onClick={handleAutoPlay}
+                disabled={stepping}
+                className="bg-surface hover:bg-surfaceHover border border-surfaceBorder text-foreground font-medium px-4 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
+              >
+                <FastForward className="w-3.5 h-3.5 text-gold" />
+                <span>Simulate Full Date</span>
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={startReplay}
+                className="bg-surface hover:bg-surfaceHover border border-surfaceBorder text-foreground font-medium px-3.5 py-1.5 rounded-xl text-xs flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-gold" />
+                <span>Replay Date</span>
+              </button>
+
+              {/* Speed Buttons */}
+              {[1, 2, 4].map((spd) => (
+                <button
+                  key={spd}
+                  onClick={() => setReplaySpeed(spd as 1 | 2 | 4)}
+                  className={`px-2 py-1 rounded text-[11px] font-mono font-bold border transition-colors ${
+                    replaySpeed === spd
+                      ? "bg-gold text-background border-gold"
+                      : "bg-surface border-surfaceBorder text-muted hover:text-foreground"
+                  }`}
+                >
+                  {spd}x
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 3. The Date Chat Room Transcript */}
+      <div className="space-y-6 min-h-[400px]">
+        {displayMessages.length === 0 ? (
+          <div className="text-center py-16 text-muted text-xs">
+            The agents are preparing for their date. Click &quot;Step Next Turn&quot; to begin!
+          </div>
+        ) : (
+          displayMessages.map((msg, idx) => {
+            if (msg.speaker === "narrator") {
+              return (
+                <div
+                  key={msg.id || idx}
