@@ -258,3 +258,190 @@ export default function DateRoomPage() {
               return (
                 <div
                   key={msg.id || idx}
+                  className="my-8 p-6 rounded-2xl bg-gradient-to-r from-amber-950/20 via-surface to-amber-950/20 border border-gold/30 text-center animate-fade-in shadow-lg"
+                >
+                  <div className="inline-flex items-center gap-1.5 text-gold text-[11px] font-semibold uppercase tracking-wider mb-2">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Atmospheric Scene &amp; Twist</span>
+                  </div>
+                  <p className="text-sm font-serif italic text-foreground leading-relaxed max-w-2xl mx-auto">
+                    &ldquo;{msg.message}&rdquo;
+                  </p>
+                </div>
+              );
+            }
+
+            const isA = msg.speaker === "a";
+            const speakerPerson = isA ? personA : personB;
+
+            return (
+              <div
+                key={msg.id || idx}
+                className={`flex gap-3 max-w-xl animate-fade-in ${
+                  isA ? "mr-auto flex-row" : "ml-auto flex-row-reverse"
+                }`}
+              >
+                <img
+                  src={speakerPerson.photo_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"}
+                  alt={speakerPerson.name}
+                  className="w-9 h-9 rounded-full object-cover border border-surfaceBorder shrink-0 mt-1"
+                />
+
+                <div className={`space-y-1.5 ${isA ? "text-left" : "text-right"}`}>
+                  <div className="flex items-center gap-2 text-[11px] text-muted">
+                    <span className="font-semibold text-foreground">{speakerPerson.name}</span>
+                    <span className="font-mono text-[10px]">Turn {msg.seq}</span>
+                    {msg.vibe && (
+                      <span className="text-gold font-mono font-semibold">· vibe {msg.vibe}/10</span>
+                    )}
+                  </div>
+
+                  {/* Message Bubble */}
+                  <div
+                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed shadow-md ${
+                      isA
+                        ? "bg-surface border border-surfaceBorder text-foreground rounded-tl-sm"
+                        : "bg-surfaceHover border border-gold/30 text-foreground rounded-tr-sm"
+                    }`}
+                  >
+                    <p>{msg.message}</p>
+
+                    {/* Proposal Ticket view inside planning phase */}
+                    {msg.proposal && (
+                      <div className="mt-3 p-3 rounded-xl bg-background border border-gold/40 text-left text-xs space-y-1 text-gold">
+                        <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider text-[10px]">
+                          <Ticket className="w-3.5 h-3.5" />
+                          <span>Proposed Outing</span>
+                        </div>
+                        <p className="font-semibold text-foreground">{msg.proposal.activity}</p>
+                        <p className="text-muted text-[11px]">
+                          {msg.proposal.place} · {msg.proposal.timeOfDay}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Private Thought Display */}
+                  {showThoughts && msg.thought && (
+                    <div
+                      className={`text-[11px] text-muted font-mono italic px-3 py-1.5 rounded-lg bg-background/60 border border-surfaceBorder/40 max-w-sm inline-block ${
+                        isA ? "text-left" : "text-left"
+                      }`}
+                    >
+                      <span className="text-gold font-semibold not-italic font-sans mr-1">
+                        Private Thought:
+                      </span>
+                      {msg.thought}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* 4. Date Card (Ticket Style) when agreed */}
+      {card && (
+        <div className="bg-gradient-to-r from-surface via-surfaceHover to-surface border border-gold/40 rounded-3xl p-6 shadow-xl relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider font-semibold text-gold flex items-center gap-1.5 mb-1">
+                <Ticket className="w-4 h-4 text-gold" />
+                <span>The Agreed Outing</span>
+              </span>
+              <h3 className="font-serif text-xl font-bold text-foreground">{card.activity}</h3>
+              <p className="text-muted text-xs mt-0.5">
+                {card.place} · {card.timeOfDay}
+              </p>
+            </div>
+            <div className="text-right text-xs text-muted max-w-xs">
+              <span className="text-gold font-semibold block">Why it fits both:</span>
+              <p className="text-[11px] leading-relaxed mt-0.5">{card.why}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Debrief Panel & Final Outcome Badge */}
+      {date.status === "done" && (
+        <div className="bg-surface border border-surfaceBorder rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-surfaceBorder">
+            <div>
+              <span className="text-xs uppercase tracking-wider font-semibold text-gold block">
+                Post-Date Debrief
+              </span>
+              <h3 className="font-serif text-2xl font-bold text-foreground">
+                Autonomous Evaluations
+              </h3>
+            </div>
+
+            <div
+              className={`px-4 py-2 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 border shadow-lg ${
+                date.outcome === "match"
+                  ? "bg-rose-950/80 border-rose-500 text-rose-300"
+                  : date.outcome === "one_sided"
+                  ? "bg-amber-950/80 border-amber-500 text-amber-300"
+                  : "bg-surfaceHover border-surfaceBorder text-muted"
+              }`}
+            >
+              <Heart className="w-4 h-4 fill-current" />
+              <span>
+                {date.outcome === "match"
+                  ? "It's A Match!"
+                  : date.outcome === "one_sided"
+                  ? "One-Sided Connection"
+                  : "Friendly Pass"}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Debrief A */}
+            <div className="p-4 rounded-2xl bg-background border border-surfaceBorder text-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-foreground">{personA.name}&apos;s Verdict</span>
+                <span className="font-mono text-gold font-bold">
+                  {date.a_debrief?.overall ?? 75}/100 Fit
+                </span>
+              </div>
+              <p className="italic text-muted leading-relaxed">
+                &ldquo;{date.a_debrief?.verdict || "Shared wonderful chemistry."}&rdquo;
+              </p>
+              {date.a_debrief?.highlights && (
+                <div className="space-y-1 text-[11px] text-emerald-400">
+                  <span className="font-semibold block">Highlights:</span>
+                  {date.a_debrief.highlights.map((h: string, i: number) => (
+                    <p key={i}>• {h}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Debrief B */}
+            <div className="p-4 rounded-2xl bg-background border border-surfaceBorder text-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-foreground">{personB.name}&apos;s Verdict</span>
+                <span className="font-mono text-gold font-bold">
+                  {date.b_debrief?.overall ?? 75}/100 Fit
+                </span>
+              </div>
+              <p className="italic text-muted leading-relaxed">
+                &ldquo;{date.b_debrief?.verdict || "Appreciated the thoughtful conversation."}&rdquo;
+              </p>
+              {date.b_debrief?.highlights && (
+                <div className="space-y-1 text-[11px] text-emerald-400">
+                  <span className="font-semibold block">Highlights:</span>
+                  {date.b_debrief.highlights.map((h: string, i: number) => (
+                    <p key={i}>• {h}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
