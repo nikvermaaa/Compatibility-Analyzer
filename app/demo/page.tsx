@@ -93,3 +93,92 @@ export default async function DemoPage() {
                     : "Scheduled"}
                 </span>
                 {d.chemistry && (
+                  <span className="text-[11px] font-mono text-gold font-bold">{d.chemistry}% vibe</span>
+                )}
+              </div>
+
+              {/* Two Avatars */}
+              <div className="flex items-center justify-center gap-2 py-1">
+                <img
+                  src={d.person_a?.photo_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}
+                  alt={d.person_a?.name}
+                  className="w-12 h-12 rounded-xl object-cover border border-surfaceBorder"
+                />
+                <span className="text-muted text-xs font-serif">&amp;</span>
+                <img
+                  src={d.person_b?.photo_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"}
+                  alt={d.person_b?.name}
+                  className="w-12 h-12 rounded-xl object-cover border border-surfaceBorder"
+                />
+              </div>
+
+              <div className="text-center text-xs">
+                <span className="font-semibold text-foreground group-hover:text-gold transition-colors block">
+                  {d.person_a?.name} &amp; {d.person_b?.name}
+                </span>
+                <span className="text-[11px] text-muted block truncate mt-0.5">
+                  {d.date_card?.activity || "Simulated Outing"}
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* 25 Profiles Grid */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between border-b border-surfaceBorder pb-4">
+          <div>
+            <h2 className="font-serif text-2xl font-bold text-foreground">
+              Season 1 Profiles ({people.length})
+            </h2>
+            <p className="text-xs text-muted mt-0.5">
+              Select any profile to view evidence grounding, reading logs, and Agent Cards.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {people.map((p: any) => {
+            const analysis = p.profiles?.analysis || {};
+            return (
+              <Link
+                key={p.id}
+                href={`/p/${p.slug}`}
+                className="bg-surface border border-surfaceBorder hover:border-gold/50 rounded-2xl p-5 shadow-lg flex flex-col justify-between space-y-4 group transition-all"
+              >
+                <div>
+                  <div className="relative mb-3">
+                    <img
+                      src={p.photo_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"}
+                      alt={p.name}
+                      className="w-full h-44 rounded-xl object-cover border border-surfaceBorder group-hover:scale-[1.02] transition-transform"
+                    />
+                    <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-md px-2 py-0.5 rounded text-[10px] font-mono text-gold font-bold">
+                      Digital Twin
+                    </div>
+                  </div>
+
+                  <h3 className="font-serif font-bold text-base text-foreground group-hover:text-gold transition-colors">
+                    {p.name}
+                  </h3>
+                  <p className="text-xs text-muted line-clamp-2 mt-1 leading-relaxed">
+                    {analysis.oneLiner || "Professional in Season 1 pool."}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-surfaceBorder/60 flex items-center justify-between text-[11px] text-muted">
+                  <span className="text-gold font-medium group-hover:underline flex items-center gap-1">
+                    <span>Inspect Profile</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </span>
+                  <span className="font-mono text-[10px]">{p.open_to}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+  );
+}
