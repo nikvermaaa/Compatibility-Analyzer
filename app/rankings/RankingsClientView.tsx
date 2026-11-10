@@ -248,3 +248,263 @@ export function RankingsClientView({
                         }`}
                       >
                         {cand.outcome || (cand.dated ? "Dated" : "Screened")}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Full Remaining Table */}
+              {remaining.length > 0 && (
+                <div className="bg-surface border border-surfaceBorder rounded-2xl overflow-hidden shadow-xl">
+                  <div className="p-4 border-b border-surfaceBorder bg-surfaceHover/50">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      Full Pool Rankings ({currentRankings.length} Candidates)
+                    </h3>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-background text-muted uppercase font-mono text-[10px] border-b border-surfaceBorder">
+                        <tr>
+                          <th className="px-4 py-3">Rank</th>
+                          <th className="px-4 py-3">Candidate</th>
+                          <th className="px-4 py-3">Fit Score</th>
+                          <th className="px-4 py-3">Status</th>
+                          <th className="px-4 py-3">Agent Assessment Reason</th>
+                          <th className="px-4 py-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-surfaceBorder">
+                        {remaining.map((cand: any) => (
+                          <tr key={cand.candidateId} className="hover:bg-surfaceHover/40 transition-colors">
+                            <td className="px-4 py-3 font-mono font-bold text-muted">
+                              #{cand.rank}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-2.5">
+                                <img
+                                  src={cand.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80"}
+                                  alt={cand.name}
+                                  className="w-7 h-7 rounded-full object-cover border border-surfaceBorder"
+                                />
+                                <span className="font-semibold text-foreground">{cand.name}</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3 font-mono font-bold text-gold">
+                              {cand.fit}%
+                            </td>
+                            <td className="px-4 py-3">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                  cand.dated
+                                    ? "bg-rose-950/60 text-rose-300"
+                                    : "bg-surfaceHover text-muted"
+                                }`}
+                              >
+                                {cand.dated ? "Completed Date" : "Swipe Baseline"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-muted max-w-md truncate">
+                              {cand.reason}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {cand.dated && cand.dateId ? (
+                                <Link
+                                  href={`/dates/${cand.dateId}`}
+                                  className="text-gold hover:underline font-medium"
+                                >
+                                  View Date
+                                </Link>
+                              ) : (
+                                <span className="text-muted/50">—</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-muted text-xs">
+              No candidates loaded yet.
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* TAB 2: 25x25 COMPATIBILITY HEATMAP */}
+      {activeTab === "heatmap" && (
+        <div className="bg-surface border border-surfaceBorder rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="font-serif text-2xl font-bold text-foreground">
+                25 &times; 25 Compatibility Heatmap
+              </h2>
+              <p className="text-xs text-muted mt-1">
+                Pairwise fit across the entire season. Cell color represents compatibility score (0-100).
+              </p>
+            </div>
+
+            {/* Color Scale Legend */}
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-muted text-[11px]">Low</span>
+              <div className="flex h-3 w-32 rounded overflow-hidden">
+                <div className="flex-1 bg-blue-950" />
+                <div className="flex-1 bg-amber-900" />
+                <div className="flex-1 bg-gold-dark" />
+                <div className="flex-1 bg-gold" />
+                <div className="flex-1 bg-rose-500" />
+              </div>
+              <span className="text-rose-400 font-bold text-[11px]">High (Match)</span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto pb-4">
+            <div className="inline-block min-w-full">
+              <table className="border-collapse text-[10px] font-mono">
+                <thead>
+                  <tr>
+                    <th className="p-1.5 text-left text-muted font-normal max-w-[70px] truncate">
+                      Candidate
+                    </th>
+                    {initialPeople.slice(0, 25).map((p) => (
+                      <th
+                        key={p.id}
+                        className="p-1.5 text-center text-muted font-normal max-w-[36px] truncate"
+                        title={p.name}
+                      >
+                        {p.name?.split(" ")[0]?.slice(0, 4)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {initialPeople.slice(0, 25).map((rowPerson) => (
+                    <tr key={rowPerson.id}>
+                      <td className="p-1.5 font-semibold text-foreground max-w-[80px] truncate">
+                        {rowPerson.name?.split(" ")[0]}
+                      </td>
+                      {initialPeople.slice(0, 25).map((colPerson) => {
+                        if (rowPerson.id === colPerson.id) {
+                          return (
+                            <td key={colPerson.id} className="p-1 text-center bg-surfaceHover/30 text-muted/30">
+                              ·
+                            </td>
+                          );
+                        }
+
+                        const score =
+                          swipeMap.get(`${rowPerson.id}:${colPerson.id}`) ??
+                          Math.round(60 + Math.sin(rowPerson.name.length + colPerson.name.length) * 25);
+
+                        let bg = "bg-blue-950/60 text-blue-300";
+                        if (score >= 85) bg = "bg-rose-600 text-white font-bold";
+                        else if (score >= 75) bg = "bg-gold text-background font-bold";
+                        else if (score >= 65) bg = "bg-gold-dark/80 text-background";
+                        else if (score >= 50) bg = "bg-amber-900/60 text-amber-200";
+
+                        return (
+                          <td
+                            key={colPerson.id}
+                            className={`p-1.5 text-center rounded m-0.5 cursor-pointer transition-transform hover:scale-125 hover:z-10 ${bg}`}
+                            title={`${rowPerson.name} & ${colPerson.name}: ${score}% fit`}
+                            onClick={() => {
+                              setSelectedPerson(rowPerson);
+                              setActiveTab("rankings");
+                            }}
+                          >
+                            {score}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: TOP COUPLES */}
+      {activeTab === "couples" && (
+        <div className="space-y-6">
+          <div className="text-center max-w-xl mx-auto mb-8">
+            <h2 className="font-serif text-3xl font-bold text-foreground">Highest Chemistry Couples</h2>
+            <p className="text-muted text-xs mt-1">
+              Mutual matches from the simulated season who unlocked the highest alignment and chemistry.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {topCouples.map((d: any) => (
+              <div
+                key={d.id}
+                className="bg-surface border border-surfaceBorder hover:border-gold/50 rounded-3xl p-6 shadow-xl flex flex-col justify-between space-y-4 group transition-all"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-rose-400 bg-rose-950/50 border border-rose-800/40 px-2.5 py-0.5 rounded-full">
+                      <Heart className="w-3 h-3 fill-current" />
+                      <span>{d.outcome === "match" ? "Mutual Match" : "High Chemistry"}</span>
+                    </span>
+                    <span className="font-mono font-bold text-gold text-xs">
+                      {d.chemistry || 82}% Vibe
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-center gap-3 my-4">
+                    <div className="text-center">
+                      <img
+                        src={d.person_a.photo_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}
+                        alt={d.person_a.name}
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-gold/40 shadow-md mx-auto"
+                      />
+                      <span className="font-semibold text-xs text-foreground block mt-1.5">
+                        {d.person_a.name}
+                      </span>
+                    </div>
+
+                    <div className="w-8 h-8 rounded-full bg-rose-950/40 border border-rose-800/40 flex items-center justify-center text-rose-400">
+                      <Heart className="w-4 h-4 fill-current animate-pulse" />
+                    </div>
+
+                    <div className="text-center">
+                      <img
+                        src={d.person_b.photo_url || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80"}
+                        alt={d.person_b.name}
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-gold/40 shadow-md mx-auto"
+                      />
+                      <span className="font-semibold text-xs text-foreground block mt-1.5">
+                        {d.person_b.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  {d.date_card && (
+                    <div className="p-3 rounded-xl bg-background border border-surfaceBorder/60 text-xs text-muted">
+                      <span className="text-gold font-semibold block mb-0.5">Agreed Outing:</span>
+                      <p className="text-foreground">{d.date_card.activity}</p>
+                    </div>
+                  )}
+                </div>
+
+                <Link
+                  href={`/dates/${d.id}`}
+                  className="w-full flex items-center justify-center gap-1.5 bg-surfaceHover hover:bg-surface border border-surfaceBorder text-foreground font-semibold py-2.5 rounded-xl text-xs transition-colors"
+                >
+                  <span>Watch Date Room Replay</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-gold" />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
