@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "tsx --env-file=.env.local scripts/seed.ts scripts/people.csv"
   },
   "dependencies": {
     "@google/genai": "^2.29.1",
